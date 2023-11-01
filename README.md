@@ -1,2 +1,2 @@
 # odmr-simulations
-ODMR - FCS experiment numerical simulations
+Simulate fluctuation analysis experiments for NV center ODMR signals
