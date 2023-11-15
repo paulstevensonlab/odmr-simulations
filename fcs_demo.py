@@ -49,28 +49,6 @@ def fit(x, a, T):
     import numpy as np
     return a*np.exp(-x/T)
 
-def arrays(amp, tau, time, contrast, counts, FWHM, freq):
-    import numpy as np
-    mag_field_arrays = np.zeros((amp.size, tau.size, time.size))
-    noisy_mag_field_arrays = np.zeros((amp.size, tau.size, time.size))
-
-    odmr_spectrum_array = np.zeros((amp.size, tau.size, time.size, 
-                                contrast.size, counts.size, FWHM.size, freq.size)) #time.size=mag_field.size
-
-    noisy_odmr_spectrum_array = np.zeros((amp.size, tau.size, time.size, 
-                          contrast.size, counts.size, FWHM.size, freq.size))
-
-    noise_odmr_spectrum_array = np.zeros((amp.size, tau.size, time.size, 
-                                contrast.size, counts.size, FWHM.size, freq.size))
-
-    noise_noisy_odmr_spectrum_array = np.zeros((amp.size, tau.size, time.size, 
-                          contrast.size, counts.size, FWHM.size, freq.size))
-
-    rms_values = np.zeros((amp.size, counts.size))
-    difference_values = np.zeros((amp.size, counts.size, time.size))
-    
-    return mag_field_arrays, noisy_mag_field_arrays, odmr_spectrum_array, noisy_odmr_spectrum_array, noise_odmr_spectrum_array, noise_noisy_odmr_spectrum_array, rms_values, difference_values
-
 def freq_point(x_range, FWHM):
     max_slope_index_1 = np.argmin(np.abs(x_range - (2814 - 0.6*0.5*1000*FWHM)/1000))
     max_slope_index_2 = np.argmin(np.abs(x_range - (2814 - 0.6*0.5*1000*FWHM)/1000))
