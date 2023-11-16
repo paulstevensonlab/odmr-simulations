@@ -5,7 +5,6 @@
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 import h5py
 import flos_backend as fcs
 import argparse
@@ -28,7 +27,6 @@ class FLOS:
 
 
     def run_sim(self, save_on = True):
-        fig, axes = plt.subplots(2, 4, figsize=(20, 8), sharex=False, sharey=False) 
         if save_on:
 
             hf.create_dataset('parent_contrast_values', data=self.contrast_values)
@@ -42,7 +40,9 @@ class FLOS:
         freq_1, freq_2 = fcs.freq_point(self.x_range, self.FWHM)
 
         for w in range(self.itr):
+
             noisy_w_1, noisy_w_2, noisy_mag_fields, noisy_w_1_array, noisy_w_2_array = fcs.freq_func(self.itr, self.tau, self.time, self.amp, noisy_w_1_array, noisy_w_2_array, w)
+            
 
             noise_odmr_spectrum, noise_noisy_odmr_spectrum = fcs.simulate_ODMR(freq_1, 
                                                                             self.FWHM, np.asarray(noisy_w_1_array[w, :]), self.FWHM, np.asarray(noisy_w_2_array[w, :]), self.contrast_values, self.counts_values) # you can pass the array directly to the function to avoid another nested loop
@@ -54,52 +54,19 @@ class FLOS:
                         autocorr_mag_data, autocorr_odmr_data1, autocorr_odmr_data2, 
                         acf_norm_mag_array, acf_norm_odmr_array1, acf_norm_odmr_array2)
             
-            
-
-
-            axes[0, 0].plot(self.time, acf_norm_mag, 'o')
-            axes[0, 0].set_title('magnetic field correlation')
-
-            axes[0, 1].plot(self.time, acf_norm_odmr1, 'o')
-            axes[0, 1].set_title('w1 odmr correlation')
-            
-            axes[0, 2].plot(self.time, acf_norm_odmr2, 'o')
-            axes[0, 2].set_title('w2 odmr correlation')
-
-            axes[0, 0].set_xlim(0,2000)
-            axes[0, 1].set_xlim(0,2000)
-            axes[0, 2].set_xlim(0,2000)
+        
 
         average_mag_array, average_odmr_array1, average_odmr_array2, avg_noisy_mag_autocorr_fit, avg_noisy_odmr_autocorr_fit1, avg_noisy_odmr_autocorr_fit2 = fcs.avg_corr_analysis(acf_norm_mag_array, acf_norm_odmr_array1, acf_norm_odmr_array2, self.tau, self.time)
 
-
-        axes[1, 0].plot(self.time[1:], avg_noisy_mag_autocorr_fit.best_fit, '--', label = f"Fit, T_fit={avg_noisy_mag_autocorr_fit.params['e_decay'].value:.3f}, \n T_char={self.tau:.3f}")
-        axes[1, 0].plot(self.time[1:], average_mag_array[1:], 'o', label = f'Corr, T_char={self.tau:.3f}')
-        axes[1, 0].set_title('magnetic field correlation')
-        axes[1, 0].legend()
-
-        axes[1, 1].plot(self.time[1:], avg_noisy_odmr_autocorr_fit1.best_fit, '--', label = f"Fit, T_fit={avg_noisy_odmr_autocorr_fit1.params['e_decay'].value:.3f}, \n T_char={self.tau:.3f}")
-        axes[1, 1].plot(self.time[1:], average_odmr_array1[1:], 'o', label = f'Corr, T_char={self.tau:.3f}')
-        axes[1, 1].set_title('w1 odmr correlation')
-        axes[1, 1].legend()
-
-        axes[1, 2].plot(self.time[1:], avg_noisy_odmr_autocorr_fit2.best_fit, '--', label = f"Fit, T_fit={avg_noisy_odmr_autocorr_fit2.params['e_decay'].value:.3f}, \n T_char={self.tau:.3f}")
-        axes[1, 2].plot(self.time[1:], average_odmr_array2[1:], 'o', label = f'Corr, T_char={self.tau:.3f}')
-        axes[1, 2].set_title('w2 odmr correlation')
-        axes[1, 2].legend()
-
-        axes[1, 0].set_xlim(0,1000)
-        axes[1, 1].set_xlim(0,1000)
-        axes[1, 2].set_xlim(0,1000)
-            
-        axes[1, 3].plot(self.time, photon_trajectory[0,:], 'o', alpha = 0.2)
-        axes[1, 3].set_title('photon trajectory')
-
        
         if save_on:
-        
+
+            hf.create_dataset('time', data = self.time)
             hf.create_dataset('freq_1_pos', data=freq_1)
             hf.create_dataset('freq_2_pos', data=freq_2)
+            hf.create_dataset('all_magfield_autocorrelation_arrays', data = acf_norm_mag_array)
+            hf.create_dataset('all_odmr_autocorrelation_arrays_1', data = acf_norm_odmr_array1)
+            hf.create_dataset('all_odmr_autocorrelation_arrays_2', data = acf_norm_odmr_array2)
             hf.create_dataset('average_magfield_autocorrelation', data = average_mag_array)
             hf.create_dataset('average_magfield_autocorrelation_fit', data = avg_noisy_mag_autocorr_fit.best_fit)
             hf.create_dataset('average_odmr_autocorrelation_1', data = average_odmr_array1)
